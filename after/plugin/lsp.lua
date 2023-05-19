@@ -1,25 +1,32 @@
-local lsp = require('lsp-zero').preset({
-  manage_nvim_cmp = {
-    set_sources = 'recommended'
-  }
-})
+local lsp = require('lsp-zero').preset({})
 
 lsp.on_attach(function(client, bufnr)
   lsp.default_keymaps({buffer = bufnr})
 end)
 
-require('lspconfig').lua_ls.setup({
-    -- on_attach = on_attach,
-    capabilities = capabilities,
-    filetypes = { "css", "eruby", "html", "javascript", "javascriptreact", "less", "sass", "scss", "svelte", "pug", "typescriptreact", "vue" },
-    init_options = {
-      html = {
-        options = {
-          -- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
-          ["bem.enabled"] = true,
-        },
-      },
-    }
-})
+-- (Optional) Configure lua language server for neovim
+require('lspconfig').lua_ls.setup(lsp.nvim_lua_ls())
 
 lsp.setup()
+
+-- You need to setup `cmp` after lsp-zero
+local cmp = require('cmp')
+local cmp_action = require('lsp-zero').cmp_action()
+
+cmp.setup({
+    preselect = 'item',
+    completion = {
+        completeopt = 'menu,menuone,noinsert'
+    },
+    mapping = {
+        -- `Enter` key to confirm completion
+        ['<Tab>'] = cmp.mapping.confirm({select = false}),
+
+        -- Ctrl+Space to trigger completion menu
+        ['<C-Space>'] = cmp.mapping.complete(),
+
+        -- Navigate between snippet placeholder
+        ['<C-f>'] = cmp_action.luasnip_jump_forward(),
+        ['<C-b>'] = cmp_action.luasnip_jump_backward(),
+    }
+})
